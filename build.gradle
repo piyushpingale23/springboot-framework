@@ -13,26 +13,46 @@ java {
     }
 }
 
+springBoot {
+    mainClass = 'api.ApiMain'
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
 
+    runtimeOnly 'com.h2database:h2'
+
     // Spring Boot Web (REST APIs + Tomcat)
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // Spring Data JPA (if DB is used)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // Dev tools (auto restart)
+    // Dev tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // Test dependency
+    // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 tasks.named('test') {
