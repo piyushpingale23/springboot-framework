@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: lms-mysql-db
+  namespace: lms
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: mysql
+
+  template:
+    metadata:
+      labels:
+        app: mysql
+
+    spec:
+      containers:
+        - name: mysql
+
+          image: piyushpingale23/mysql:8
+
+          ports:
+            - containerPort: 3306
+
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: Root@123
+
+            - name: MYSQL_DATABASE
+              value: lms
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: lms-mysql-db
+  namespace: lms
+
+spec:
+  selector:
+    app: mysql
+
+  ports:
+    - port: 3306
+      targetPort: 3306
+
+  type: ClusterIP

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: lms-api-service
+  namespace: lms
+
+spec:
+
+  selector:
+    app: lms-api
+
+  ports:
+    - port: 8090
+      targetPort: 8090
+
+  type: NodePort

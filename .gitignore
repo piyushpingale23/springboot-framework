@@ -1,40 +1,73 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.0'
-    id 'io.spring.dependency-management' version '1.1.4'
-}
+# ==========================
+# Gradle
+# ==========================
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+.gradle/
+build/
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
+# Ignore all generated JARs
+*.jar
+!gradle-wrapper.jar
 
-repositories {
-    mavenCentral()
-}
+# ==========================
+# IntelliJ IDEA
+# ==========================
 
-dependencies {
+.idea/
+*.iml
+out/
 
-    // Spring Boot Web (REST APIs + Tomcat)
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+# ==========================
+# VS Code
+# ==========================
 
-    // Spring Data JPA (if DB is used)
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+.vscode/
 
-    // Validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+# ==========================
+# Eclipse / STS
+# ==========================
 
-    // Dev tools (auto restart)
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+.project
+.classpath
+.settings/
+bin/
 
-    // Test dependency
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
+# ==========================
+# OS Files
+# ==========================
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Logs
+# ==========================
+
+*.log
+
+# ==========================
+# Temporary Files
+# ==========================
+
+*.tmp
+*.swp
+*.swo
+
+# ==========================
+# Environment Files
+# ==========================
+
+.env
+.env.*
+
+# ==========================
+# Java
+# ==========================
+
+*.class
+
+# ==========================
+# Maven
+# ==========================
+
+target/
