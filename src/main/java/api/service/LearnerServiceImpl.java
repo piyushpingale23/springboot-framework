@@ -7,6 +7,7 @@ import api.repository.LearnerRepository;
 import api.requests.LearnerRequest;
 import api.response.LearnerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,9 @@ public class LearnerServiceImpl implements LearnerService{
     }
 
     @Override
+    @Cacheable(value = "learners", key = "#name")
     public List<Learner> fetchByName(String name) {
+        System.out.println("Fetching from DB");
         return learnerRepository.findByName(name);
     }
 

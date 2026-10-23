@@ -20,6 +20,8 @@ public class ApplicationContextExample {
 
     public static void main(String[] args) {
 
+        System.out.println("Main start!");
+
         ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
 
         /*
@@ -31,6 +33,8 @@ public class ApplicationContextExample {
         Engine engine = context.getBean("engine_application_context", Engine.class);
 
         engine.start();
+
+        System.out.println("Main end!");
     }
 }
 

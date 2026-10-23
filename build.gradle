@@ -53,6 +53,28 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.34'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // Spring Boot Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // Optional: Redis Cache Support
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // Optional: JSON serialization
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok (Optional)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // GraphQL
+    implementation 'org.springframework.boot:spring-boot-starter-graphql'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 tasks.named('test') {

@@ -1,303 +1,437 @@
-# Spring & Spring Boot Important Annotations
-
-## 1. Spring IoC Container
-
-### What is a Bean?
-
-A Bean is an object whose lifecycle is managed by the Spring IoC Container.
-
-Spring is responsible for:
-
-* Creating beans
-* Injecting dependencies
-* Managing bean lifecycle
-* Destroying beans
+# Spring Boot Annotations
 
 ---
 
-## 2. Core Spring Framework Annotations
+# 1. Core Spring Framework Annotations
 
-### Component Scanning & Bean Definition
+## Component Scanning and Bean Definition
 
-| Annotation        | Description                                                                  |
-|-------------------|------------------------------------------------------------------------------|
-| `@Component`      | Generic Spring-managed bean.                                                 |
-| `@Controller`     | Spring MVC Controller.                                                       |
-| `@RestController` | Combines `@Controller` + `@ResponseBody`. Used for REST APIs.                |
-| `@Service`        | Service layer bean containing business logic.                                |
-| `@Repository`     | DAO/Persistence layer bean. Also translates database exceptions.             |
-| `@Configuration`  | Class containing bean definitions.                                           |
-| `@Bean`           | Method-level annotation that registers the returned object as a Spring bean. |
+| Annotation        | Description                                                                              |
+|-------------------|------------------------------------------------------------------------------------------|
+| `@Component`      | Marks a class as a Spring-managed bean detected automatically during component scanning. |
+| `@Controller`     | Specialization of `@Component` used for Spring MVC controllers.                          |
+| `@Service`        | Specialization of `@Component` used for service/business-logic classes.                  |
+| `@Repository`     | Specialization of `@Component` used for DAO/data-access classes.                         |
+| `@RestController` | Combines `@Controller` + `@ResponseBody`, commonly used for REST APIs.                   |
+| `@Configuration`  | Marks a class as a configuration class containing bean definitions.                      |
+| `@Bean`           | Registers the object returned by a method as a Spring bean.                              |
 
-### Notes
+## `@Component`
 
-#### @Component
+Marks a class as a Spring-managed bean.
 
-```java
+```
 @Component
 public class EmailService {
-}
-```
 
-Detected automatically through component scanning.
-
----
-
-#### @Configuration
-
-```java
-@Configuration
-public class AppConfig {
-
-    @Bean
-    public EmailService emailService() {
-        return new EmailService();
+    public void sendEmail() {
+        System.out.println("Email sent");
     }
 }
 ```
 
-Used when you want to manually create beans.
+Spring detects `EmailService` during component scanning and creates its bean.
 
----
+## `@Service`
 
-#### @Bean
+Specialization of `@Component`, mainly used for business logic.
 
-```java
-@Bean
-public EmailService emailService() {
-    return new EmailService();
+```
+@Service
+public class PaymentService {
+
+    public void processPayment() {
+        System.out.println("Payment processed");
+    }
 }
 ```
 
-Registers the returned object as a bean.
+## `@Repository`
 
----
+Specialization of `@Component`, mainly used for data-access/database classes.
 
-## 3. Dependency Injection Annotations
-
-| Annotation   | Description                               |
-|--------------|-------------------------------------------|
-| `@Autowired` | Inject bean by type.                      |
-| `@Qualifier` | Select a specific bean.                   |
-| `@Primary`   | Default bean when multiple beans exist.   |
-| `@Value`     | Inject literal values or property values. |
-| `@Resource`  | Inject bean by name.                      |
-
-### Example
-
-```java
-@Autowired
-@Qualifier("emailService")
-private NotificationService service;
 ```
+@Repository
+public class PaymentRepository {
 
----
-
-### Bean Ambiguity Resolution
-
-When multiple beans of the same type exist:
-
-```text
-NoUniqueBeanDefinitionException
-```
-
-Solutions:
-
-#### @Qualifier
-
-```java
-@Autowired
-@Qualifier("emailService")
-private NotificationService service;
-```
-
-#### @Primary
-
-```java
-@Bean
-@Primary
-public NotificationService emailService() {
-    return new EmailService();
+    public Payment findById(Long id) {
+        // Database operation
+        return new Payment();
+    }
 }
 ```
 
-#### @Resource
+`@Repository` also enables Spring's persistence exception translation.
 
-```java
-@Resource(name = "emailService")
-private NotificationService service;
+## `@Controller`
+
+Used for Spring MVC controllers, generally when returning a view.
+
+```
+@Controller
+public class PaymentController {
+
+    @GetMapping("/payment")
+    public String paymentPage() {
+        return "payment";
+    }
+}
 ```
 
-#### @Profile
+## `@RestController`
 
-```java
-@Bean
-@Profile("dev")
-public NotificationService notificationService() {
-    return new MockNotificationService();
+Used for REST APIs.
+
+```
+@RestController
+public class PaymentController {
+
+    @GetMapping("/payment")
+    public Payment getPayment() {
+        return new Payment();
+    }
 }
+```
+
+Conceptually:
+
+```
+@RestController = @Controller + @ResponseBody
+```
+
+The returned Java object is written directly to the HTTP response, usually as JSON.
+
+---
+
+# 2. `@Configuration` and `@Bean`
+
+## `@Configuration`
+
+Marks a class as a configuration class containing bean definitions.
+
+```
+@Configuration
+public class AppConfig {
+}
+```
+
+## `@Bean`
+
+Marks a method whose return value should be registered as a Spring bean.
+
+```
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public PaymentService paymentService() {
+        return new PaymentService();
+    }
+}
+```
+
+Flow:
+
+```
+@Configuration
+      ↓
+@Bean method
+      ↓
+PaymentService object created
+      ↓
+Registered in Spring IoC Container
+```
+
+### When to use `@Bean`?
+
+Use `@Bean` when:
+
+* You cannot modify the class to add `@Component`.
+* You need custom object configuration.
+
+---
+
+# 3. Spring MVC Annotations
+
+## `@RequestMapping`
+
+Maps an HTTP request to a controller class or method.
+
+**Used on:** Class or method.
+
+```
+@RestController
+@RequestMapping("/payments")
+public class PaymentController {
+
+    @RequestMapping("/process")
+    public String process() {
+        return "Payment processed";
+    }
+}
+```
+
+Request:
+
+```
+GET /payments/process
 ```
 
 ---
 
-## 4. Bean Lifecycle Annotations
+## `@ResponseBody`
 
-| Annotation       | Description                                          |
-|------------------|------------------------------------------------------|
-| `@PostConstruct` | Called after bean creation and dependency injection. |
-| `@PreDestroy`    | Called before bean destruction.                      |
+Tells Spring to write the return value directly to the HTTP response body.
 
-Example:
+```
+@Controller
+public class PaymentController {
 
-```java
-@PostConstruct
-public void init() {
-    System.out.println("Bean Initialized");
+    @ResponseBody
+    @GetMapping("/payment")
+    public Payment getPayment() {
+        return new Payment();
+    }
 }
+```
 
-@PreDestroy
-public void destroy() {
-    System.out.println("Bean Destroyed");
+`@RestController` already provides `@ResponseBody` behavior.
+
+---
+
+## `@RequestBody`
+
+It maps the HTTP request body, usually JSON, to a Java object.
+
+```
+@PostMapping("/payment")
+public String createPayment(@RequestBody Payment payment) {
+    return "Payment created";
 }
+```
+
+Request:
+
+```
+{
+    "amount": 1000,
+    "type": "CASH"
+}
+```
+
+Flow:
+
+```
+JSON Request Body
+       ↓
+  @RequestBody
+       ↓
+Payment Java Object
 ```
 
 ---
 
-## 5. Bean Scope Annotations
+## `@ModelAttribute`
 
-| Scope       | Description                      |
-|-------------|----------------------------------|
-| singleton   | Default. One bean per container. |
-| prototype   | New bean every request.          |
-| request     | One bean per HTTP request.       |
-| session     | One bean per HTTP session.       |
-| application | One bean per ServletContext.     |
+Binds request/form parameters to a Java object.
 
-Example:
-
-```java
-@Component
-@Scope("prototype")
-public class MyBean {
+```
+@PostMapping("/payment")
+public String createPayment(@ModelAttribute Payment payment) {
+    return "Payment created";
 }
 ```
 
+Example form data:
+
+```
+amount=1000
+type=CASH
+```
+
 ---
 
-## 6. Lazy Initialization
+## `@PathVariable`
 
-```java
-@Lazy
-@Component
-public class EmailService {
+Extracts a value from the URL path.
+
+```
+@GetMapping("/payment/{id}")
+public Payment getPayment(@PathVariable Long id) {
+    return paymentService.getPayment(id);
 }
 ```
 
-Bean is created only when first requested.
+Request:
 
-Default Spring behavior:
+```
+GET /payment/10
+```
 
-```text
-Singleton beans -> Eager Initialization
+Then:
+
+```
+id = 10
 ```
 
 ---
 
-## 7. Spring MVC Annotations
+## `@RequestParam`
 
-### Request Mapping
+Reads query parameters.
 
-| Annotation        | Description              |
-|-------------------|--------------------------|
-| `@RequestMapping` | Generic request mapping. |
-| `@GetMapping`     | Handles HTTP GET.        |
-| `@PostMapping`    | Handles HTTP POST.       |
-| `@PutMapping`     | Handles HTTP PUT.        |
-| `@DeleteMapping`  | Handles HTTP DELETE.     |
-| `@PatchMapping`   | Handles HTTP PATCH.      |
-
-Example:
-
-```java
-@GetMapping("/users")
-public List<User> getUsers() {
-    return users;
+```
+@GetMapping("/payment")
+public Payment getPayment(@RequestParam Long id) {
+    return paymentService.getPayment(id);
 }
 ```
 
+Request:
+
+```
+GET /payment?id=10
+```
+
+Then:
+
+```
+id = 10
+```
+
+### Difference
+
+```
+@PathVariable
+/payment/10
+
+@RequestParam
+/payment?id=10
+```
+
 ---
 
-### Request/Response Binding
+## `@RequestHeader`
 
-| Annotation        | Description                 |
-|-------------------|-----------------------------|
-| `@RequestBody`    | Request JSON → Java Object  |
-| `@ResponseBody`   | Java Object → Response Body |
-| `@ModelAttribute` | Form data binding           |
-| `@PathVariable`   | Extract value from URL path |
-| `@RequestParam`   | Extract query parameter     |
-| `@RequestHeader`  | Extract HTTP header         |
+Extracts a value from an HTTP request header.
 
-Example:
+```
+@GetMapping("/payment")
+public String getPayment(
+        @RequestHeader("Authorization") String token) {
 
-```java
-@GetMapping("/users/{id}")
-public User getUser(@PathVariable Long id) {
-    return service.find(id);
+    return token;
 }
 ```
 
+Request header:
+
+```
+Authorization: Bearer abc123
+```
+
+Then:
+
+```
+token = "Bearer abc123"
+```
+
 ---
 
-## 8. Exception Handling
+# 4. Dependency Injection
 
-### @ExceptionHandler
+| Annotation   | Description                                                               |
+|--------------|---------------------------------------------------------------------------|
+| `@Autowired` | Injects a Spring bean, primarily by type.                                 |
+| `@Qualifier` | Selects a specific bean when multiple beans of the same type exist.       |
+| `@Primary`   | Marks one bean as the default when multiple beans of the same type exist. |
+| `@Value`     | Injects values from configuration/properties or literal values.           |
+| `@Resource`  | Injects a bean primarily by name.                                         |
 
-```java
-@ExceptionHandler(UserNotFoundException.class)
-public String handleException() {
-    return "User Not Found";
+## `@Autowired`
+
+Injects a Spring-managed bean.
+
+```
+@Service
+public class PaymentController {
+
+    private final PaymentService paymentService;
+
+    @Autowired
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 }
 ```
 
----
+With a single constructor, `@Autowired` can be omitted:
 
-### @ControllerAdvice
-
-Global exception handling:
-
-```java
-@ControllerAdvice
-public class GlobalExceptionHandler {
+```
+public PaymentController(PaymentService paymentService) {
+    this.paymentService = paymentService;
 }
 ```
 
----
-
-## 9. Spring Boot Annotations
-
-| Annotation                       | Description                                                                  |
-|----------------------------------|------------------------------------------------------------------------------|
-| `@SpringBootApplication`         | Combines `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`. |
-| `@EnableAutoConfiguration`       | Automatically configures beans based on dependencies.                        |
-| `@ComponentScan`                 | Scans packages for Spring components.                                        |
-| `@PropertySource`                | Loads custom properties files.                                               |
-| `@ConfigurationProperties`       | Binds properties to a POJO.                                                  |
-| `@EnableConfigurationProperties` | Registers ConfigurationProperties beans.                                     |
-| `@ConfigurationPropertiesScan`   | Automatically scans ConfigurationProperties classes.                         |
-| `@Profile`                       | Creates beans only for specific environments.                                |
-| `@ConditionalOnProperty`         | Conditional bean creation.                                                   |
-| `@ConditionalOnMissingBean`      | Create bean only if no matching bean exists.                                 |
+Spring finds the `PaymentService` bean and injects it.
 
 ---
 
-## 10. @SpringBootApplication Breakdown
+## `@Value`
+
+Injects a configuration/property value.
+
+`application.properties`:
 
 ```
-@SpringBootApplication
+app.name=Core Service
+app.version=1.0
 ```
 
-Equivalent to:
+Java:
+
+```
+@Service
+public class AppService {
+
+    @Value("${app.name}")
+    private String appName;
+
+    @Value("${app.version}")
+    private String version;
+}
+```
+
+Values:
+
+```
+appName = "Core Service"
+version = "1.0"
+```
+
+---
+
+# 5. Spring Boot Annotations
+
+| Annotation                       | Description                                                                                              |
+|----------------------------------|----------------------------------------------------------------------------------------------------------|
+| `@SpringBootApplication`         | Combines `@SpringBootConfiguration`, `@EnableAutoConfiguration`, and `@ComponentScan`.                   |
+| `@SpringBootConfiguration`       | Marks the main Spring Boot configuration class.                                                          |
+| `@EnableAutoConfiguration`       | Automatically configures beans based on classpath dependencies and application configuration.            |
+| `@ComponentScan`                 | Scans packages for Spring components such as `@Component`, `@Service`, `@Repository`, and `@Controller`. |
+| `@PropertySource`                | Loads a custom properties file into Spring's `Environment`.                                              |
+| `@ConfigurationProperties`       | Binds a group of configuration properties to a Java object.                                              |
+| `@EnableConfigurationProperties` | Registers/enables `@ConfigurationProperties` classes as Spring beans.                                    |
+| `@ConditionalOnProperty`         | Creates a bean based on a property value/existence.                                                      |
+| `@ConditionalOnMissingBean`      | Creates a bean only when another matching bean does not already exist.                                   |
+| `@SpringBootTest`                | Used for Spring Boot integration testing.                                                                |
+| `@TestConfiguration`             | Provides additional configuration specifically for tests.                                                |
+
+---
+
+# 6. `@SpringBootApplication`
+
+`@SpringBootApplication` is a combination of:
 
 ```
 @SpringBootConfiguration
@@ -307,50 +441,87 @@ Equivalent to:
 
 ---
 
-### @SpringBootConfiguration
+# 7. `@SpringBootConfiguration`
 
-Equivalent to:
+Marks the class as the main Spring Boot configuration class.
+
+Conceptually:
 
 ```
-@Configuration
+@SpringBootConfiguration ≈ @Configuration
 ```
-
-Marks the class as a configuration source.
 
 ---
 
-### @EnableAutoConfiguration
+# 8. `@EnableAutoConfiguration`
 
-Purpose:
+Tells Spring Boot:
 
-```text
-Automatically configure infrastructure beans
-based on dependencies present in classpath.
+```
+"Automatically configure the application based on
+ the libraries available on the classpath and
+ application configuration."
 ```
 
-Examples:
+Example:
 
-* Tomcat
-* DispatcherServlet
-* Jackson
-* DataSource
-* JPA
+If the project contains:
+
+```
+spring-boot-starter-web
+```
+
+Spring Boot can automatically configure infrastructure such as:
+
+```
+Embedded Tomcat
+Spring MVC
+DispatcherServlet
+Jackson
+HTTP message converters
+```
+
+If the project contains JPA/database dependencies and database configuration, Spring Boot can also autoconfigure:
+
+```
+DataSource
+EntityManagerFactory
+Transaction infrastructure
+```
+
+Important:
+
+```
+Starter dependency
+     ↓
+Adds libraries to classpath
+     ↓
+@EnableAutoConfiguration
+     ↓
+Detects available libraries/configuration
+     ↓
+Creates appropriate Spring beans
+```
+
+The starter itself does not perform the autoconfiguration.
 
 ---
 
-### @ComponentScan
+# 9. `@ComponentScan`
 
-Scans:
+Tells Spring which packages to scan for component classes.
 
-```text
-Package of main class
-+
-All sub-packages
+Example:
+
+```
+@ComponentScan("com.myapp")
+public class AppConfig {
+}
 ```
 
-for:
+Spring scans the package and subpackages for:
 
-```text
+```
 @Component
 @Service
 @Repository
@@ -358,262 +529,560 @@ for:
 @RestController
 ```
 
----
+and registers them as beans.
 
-## Startup Flow
+### Default behavior
 
-```java
+With:
+
+```
 @SpringBootApplication
-public class MyApplication {
-}
 ```
 
-### Step 1
+component scanning normally starts from the package containing the main application class and scans its subpackages.
 
-Load configuration class.
+Example:
 
-### Step 2
+```
+com.myapp
+├── MyApplication.java
+├── controller
+├── service
+└── repository
+```
 
-Auto Configuration
-
-Spring checks dependencies and creates infrastructure beans.
-
-### Step 3
-
-Component Scanning
-
-Registers application beans.
+If `MyApplication` is in `com.myapp`, the subpackages are scanned automatically.
 
 ---
 
-## 11. Property Management
+# 10. `@PropertySource`
 
-### @PropertySource
+Loads a custom `.properties` file into Spring's `Environment`.
 
-Purpose:
+Example:
 
-Load custom property files.
+```
+src/main/resources/custom.properties
+```
 
-```java
+Contents:
+
+```
+app.name=Core Service
+```
+
+Configuration:
+
+```
 @Configuration
 @PropertySource("classpath:custom.properties")
 public class AppConfig {
 }
 ```
 
-### Important Notes
+Now the property can be accessed using:
+
+```
+@Value("${app.name}")
+private String appName;
+```
+
+### Important Points
 
 Spring Boot automatically loads:
 
-```text
+```
 application.properties
 application.yml
+```
+
+and profile-specific files such as:
+
+```
 application-dev.properties
 application-prod.properties
 ```
 
-Custom files are NOT loaded automatically.
+Custom files such as:
 
----
+```
+custom.properties
+```
 
-### classpath:
+are not automatically loaded just because they are inside `src/main/resources`.
+
+Use:
 
 ```
 @PropertySource("classpath:custom.properties")
 ```
 
-Refers to:
+to load them.
 
-```text
-src/main/resources/custom.properties
+### `classpath:`
+
+```
+@PropertySource("classpath:custom.properties")
 ```
 
-Resources are copied into the application's classpath during build.
+means Spring looks for:
+
+```
+custom.properties
+```
+
+on the application's runtime classpath.
+
+For a standard project:
+
+```
+src/main/resources/custom.properties
+                 ↓
+            build output
+                 ↓
+             classpath
+                 ↓
+         custom.properties
+```
 
 ---
 
-## 12. @ConfigurationProperties
+# 11. `@ConfigurationProperties`
 
-Purpose:
+Used to bind a group of related configuration properties to a Java object.
 
-Bind a group of properties to a Java object.
+`application.properties`:
 
-Example:
-
-```properties
-app.name=My Application
+```
+app.name=Core Service
 app.version=1.0
 app.owner=Piyush
 ```
 
-```java
-@ConfigurationProperties(prefix="app")
+Java:
+
+```
+@ConfigurationProperties(prefix = "app")
 public class AppProperties {
 
     private String name;
     private String version;
     private String owner;
 
-    // getters/setters
+    // getters and setters
 }
 ```
 
----
-
-## 13. @EnableConfigurationProperties
-
-Registers ConfigurationProperties classes as Spring beans.
+Binding:
 
 ```
+app.name
+   ↓
+name
+
+app.version
+   ↓
+version
+
+app.owner
+   ↓
+owner
+```
+
+Result:
+
+```
+AppProperties
+    ├── name = "Core Service"
+    ├── version = "1.0"
+    └── owner = "Piyush"
+```
+
+### Why use `@ConfigurationProperties`?
+
+Instead of:
+
+```
+@Value("${app.name}")
+@Value("${app.version}")
+@Value("${app.owner}")
+```
+
+you can group related configuration into one object.
+
+---
+
+# 12. `@EnableConfigurationProperties`
+
+Used to enable/register a `@ConfigurationProperties` class as a Spring bean.
+
+Example:
+
+```
+@ConfigurationProperties(prefix = "app")
+public class AppProperties {
+
+    private String name;
+
+    // getter/setter
+}
+
+@Configuration
 @EnableConfigurationProperties(AppProperties.class)
-```
-
----
-
-## 14. Conditional Bean Creation
-
-### @ConditionalOnProperty
-
-```java
-@Bean
-@ConditionalOnProperty(
-    name="feature.email.enabled",
-    havingValue="true"
-)
-public EmailService emailService() {
-    return new EmailService();
+public class AppConfig {
 }
 ```
 
-Bean created only when:
+Now `AppProperties` can be injected:
 
-```properties
-feature.email.enabled=true
 ```
-
----
-
-### @ConditionalOnMissingBean
-
-```java
-@Bean
-@ConditionalOnMissingBean
-public EmailService emailService() {
-    return new EmailService();
-}
-```
-
-Creates bean only if no bean of that type already exists.
-
----
-
-## 15. Testing Annotations
-
-| Annotation           | Description                         |
-|----------------------|-------------------------------------|
-| `@SpringBootTest`    | Loads complete application context. |
-| `@TestConfiguration` | Test-specific configuration.        |
-| `@MockBean`          | Replaces bean with Mockito mock.    |
-| `@WebMvcTest`        | Tests only MVC layer.               |
-
----
-
-## Recommended Dependency Injection
-
-Prefer Constructor Injection:
-
-```java
 @Service
-public class UserService {
+public class AppService {
 
-    private final EmailService emailService;
+    private final AppProperties properties;
 
-    public UserService(EmailService emailService) {
-        this.emailService = emailService;
+    public AppService(AppProperties properties) {
+        this.properties = properties;
     }
 }
 ```
 
-Advantages:
-
-* Immutable dependencies
-* Easier unit testing
-* No reflection-based field injection
-* Recommended by Spring Team
+In Spring Boot applications, `@ConfigurationProperties` classes can also be registered using other mechanisms such as `@ConfigurationPropertiesScan`.
 
 ---
 
-# Quick Revision
+# 13. Conditional Annotations
+
+Spring Boot provides conditional annotations to decide whether a bean should be created.
+
+Common examples:
+
+```
+@ConditionalOnProperty
+@ConditionalOnMissingBean
+@ConditionalOnBean
+@ConditionalOnClass
+@ConditionalOnMissingClass
+```
+
+These are heavily used internally by Spring Boot autoconfiguration.
+
+---
+
+# 14. `@ConditionalOnProperty`
+
+Creates a bean only when a specified property matches a condition.
+
+`application.properties`:
+
+```
+feature.email.enabled=true
+```
+
+Java:
+
+```
+@Configuration
+public class AppConfig {
+
+    @Bean
+    @ConditionalOnProperty(
+        name = "feature.email.enabled",
+        havingValue = "true"
+    )
+    public EmailService emailService() {
+        return new EmailService();
+    }
+}
+```
+
+If:
+
+```
+feature.email.enabled=true
+```
+
+then:
+
+```
+EmailService bean → CREATED
+```
+
+If:
+
+```
+feature.email.enabled=false
+```
+
+then:
+
+```
+EmailService bean → NOT CREATED
+```
+
+### Useful for feature toggles
+
+Example:
+
+```
+feature.sms.enabled=true
+feature.email.enabled=false
+```
+
+This allows features/beans to be enabled or disabled through configuration without changing Java code.
+
+---
+
+# 15. `@ConditionalOnMissingBean`
+
+Creates a bean only when a matching bean does not already exist.
+
+Example:
+
+```
+@Bean
+@ConditionalOnMissingBean
+public PaymentService paymentService() {
+    return new PaymentService();
+}
+```
+
+Meaning:
+
+```
+PaymentService already exists?
+      ↓
+   YES → Do not create this bean
+   NO  → Create this bean
+```
+
+This is commonly used by Spring Boot autoconfiguration so that user-defined beans can override default beans.
+
+---
+
+# 16. Testing Annotations
+
+## `@SpringBootTest`
+
+Used for Spring Boot integration testing.
+
+```
+@SpringBootTest
+class PaymentServiceTest {
+
+    @Test
+    void testPayment() {
+        // Test
+    }
+}
+```
+
+It loads the Spring application context for the test.
+
+---
+
+## `@TestConfiguration`
+
+Provides additional configuration specifically for tests.
+
+```
+@TestConfiguration
+public class TestConfig {
+
+    @Bean
+    public PaymentService paymentService() {
+        return new PaymentService();
+    }
+}
+```
+
+Useful when a test needs additional or customized beans without changing the main application configuration.
+
+---
+
+# 17. Quick Revision
 
 ## Bean Creation
 
-```text
-@Component → Generic Spring annotation used to mark a class as a Spring-managed bean (base stereotype).
-@Service → Specialization of @Component used for service layer classes containing business logic.
-@Repository → Specialization of @Component used for DAO layer classes and also provides exception translation for database errors.
-@Controller → Specialization of @Component used in Spring MVC to handle web requests and return views.
-@RestController → Combination of @Controller + @ResponseBody, used for REST APIs to return JSON/XML responses directly.
-@Bean
 ```
-
-## Dependency Injection
-
-```text
-@Autowired → Injects a dependency into a field/constructor/method by type from the Spring container.
-@Qualifier → Specifies which bean to inject when multiple beans of the same type exist.
-@Primary → Marks a bean as the default choice when multiple beans of the same type exist.
-@Resource → Injects a bean by name (not type) when multiple beans exist.
-@Value → Injects values from .properties / .yml files or literals into fields.
+@Component
+@Service
+@Repository
+@Controller
+@RestController
+@Bean
 ```
 
 ## Configuration
 
-```text
-@Configuration → Indicates that a class declares one or more Spring bean definitions; it replaces XML configuration and is used to define beans using @Bean methods.
+```
+@Configuration
+@ConfigurationProperties
+@EnableConfigurationProperties
+@PropertySource
+```
 
-@PropertySource → Used to load external property files (like .properties or .yml) into Spring’s Environment so values can be accessed using @Value or Environment.
+## Dependency Injection
 
-@ConfigurationProperties → Binds external configuration properties (from application.properties or application.yml) to a Java POJO in a type-safe way using a prefix.
+```
+@Autowired
+@Qualifier
+@Primary
+@Resource
+@Value
+```
 
-@EnableConfigurationProperties → Enables support for classes annotated with @ConfigurationProperties, making them eligible for binding and registration as Spring beans when not using component scanning.
+## Spring MVC
+
+```
+@RequestMapping
+@GetMapping
+@PostMapping
+@PutMapping
+@DeleteMapping
+@RequestBody
+@ResponseBody
+@PathVariable
+@RequestParam
+@RequestHeader
+@ModelAttribute
 ```
 
 ## Spring Boot
 
-```text
+```
 @SpringBootApplication
+@SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan
 ```
 
-## MVC
+## Conditional Configuration
 
-```text
-@RequestMapping → Base annotation used to map HTTP requests to handler methods or classes; supports all HTTP methods (GET, POST, PUT, DELETE, etc.) and can be used at class or method level.
-
-@GetMapping → Specialized version of @RequestMapping for handling HTTP GET requests; used to retrieve data from the server.
-
-@PostMapping → Specialized version of @RequestMapping for handling HTTP POST requests; used to send data to the server (create resources).
-
-@RequestBody → Binds the HTTP request body (usually JSON/XML) to a Java object; used for reading incoming data in POST/PUT requests.
-
-@PathVariable → Extracts values from the URI path (URL template variables) and binds them to method parameters.
-
-@RequestParam → Extracts query parameters from the URL (after ?) and binds them to method parameters; used for optional or filtering inputs.
 ```
-
-## Lifecycle
-
-```text
-@PostConstruct → Method-level annotation used to execute a method after dependency injection is completed and the bean is fully initialized; typically used for setup/initialization logic.
-
-@PreDestroy → Method-level annotation used to execute a method just before the bean is removed from the Spring container (application shutdown); typically used for cleanup logic like releasing resources.
-```
-
-## Conditions
-
-```text
-@Profile
 @ConditionalOnProperty
 @ConditionalOnMissingBean
+@ConditionalOnBean
+@ConditionalOnClass
+```
+
+## Testing
+
+```
+@SpringBootTest
+@TestConfiguration
+```
+
+---
+
+# 18. Most Important Relationships to Remember
+
+```
+@SpringBootApplication
+         =
+@SpringBootConfiguration
+       +
+@EnableAutoConfiguration
+       +
+@ComponentScan
+
+@RestController
+         =
+@Controller
+       +
+@ResponseBody
+
+@Service
+         extends
+@Component conceptually
+
+@Repository
+         extends
+@Component conceptually
+
+@Controller
+         extends
+@Component conceptually
+
+@RestController
+         extends
+@Controller conceptually
+
+@Bean
+→ Method-level bean definition
+
+@Component
+→ Class-level component scanning
+```
+
+---
+
+# 19. One-Line Interview Revision
+
+```
+@Component
+→ Generic Spring-managed component.
+
+@Service
+→ Business/service layer bean.
+
+@Repository
+→ Data-access layer bean.
+
+@Controller
+→ MVC controller returning views.
+
+@RestController
+→ REST controller returning response bodies.
+
+@Configuration
+→ Configuration class containing bean definitions.
+
+@Bean
+→ Manually register a method's return object as a Spring bean.
+
+@Autowired
+→ Inject bean primarily by type.
+
+@Qualifier
+→ Explicitly select a bean.
+
+@Primary
+→ Mark the default bean among multiple candidates.
+
+@Resource
+→ Inject bean primarily by name.
+
+@Value
+→ Inject configuration/literal values.
+
+@RequestBody
+→ HTTP body → Java object.
+
+@ResponseBody
+→ Java return value → HTTP response body.
+
+@PathVariable
+→ Extract value from URL path.
+
+@RequestParam
+→ Extract query parameter.
+
+@RequestHeader
+→ Extract HTTP header.
+
+@ConfigurationProperties
+→ Bind a group of properties to an object.
+
+@ConditionalOnProperty
+→ Create bean based on property condition.
+
+@SpringBootApplication
+→ Main Spring Boot configuration annotation.
+
+@EnableAutoConfiguration
+→ Automatically configure beans based on classpath/configuration.
+
+@ComponentScan
+→ Find component classes and register them as beans.
 ```
