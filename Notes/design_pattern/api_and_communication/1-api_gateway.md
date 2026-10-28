@@ -1,4 +1,4 @@
-# 1. API Gateway Pattern - API & Communication Pattern
+# API Gateway Pattern
 
 ## 1.1 Definition
 

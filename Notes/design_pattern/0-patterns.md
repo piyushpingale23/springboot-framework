@@ -1,9 +1,5 @@
 # Microservices Patterns
 
-# 1. Microservices Patterns — Learning Roadmap
-
-We will learn the patterns in the following order.
-
 ## A. API & Communication Patterns
 
 ### 1. API Gateway Pattern
@@ -94,19 +90,11 @@ We will learn the patterns in the following order.
 * Compensating transactions
 * Failure scenarios
 
-### 10. Event Sourcing Pattern ⭐⭐⭐⭐
-
-* Events instead of current state
-* Event store
-* Rebuilding state
-* Audit history
-* Advantages/disadvantages
-
 ---
 
 # D. Scalability & Availability Patterns
 
-### 12. Load Balancing Pattern
+### 10. Load Balancing Pattern
 
 * Horizontal scaling
 * Multiple service instances
@@ -115,14 +103,7 @@ We will learn the patterns in the following order.
 * Weighted routing
 * Health checks
 
-### 13. Stateless Service Pattern
-
-* Stateless applications
-* Horizontal scaling
-* Session management
-* Redis/JWT/external state
-
-### 14. Idempotency Pattern
+### 11. Idempotency Pattern
 
 * Duplicate requests
 * Payment APIs
@@ -134,7 +115,7 @@ We will learn the patterns in the following order.
 
 # E. Security & Traffic Management
 
-### 15. Rate Limiting Pattern
+### 12. Rate Limiting Pattern
 
 * Request throttling
 * Fixed Window
@@ -147,7 +128,7 @@ We will learn the patterns in the following order.
 
 # F. Migration & Infrastructure Patterns
 
-### 16. Sidecar Pattern
+### 13. Sidecar Pattern
 
 * Helper container/process
 * Logging
@@ -159,7 +140,7 @@ We will learn the patterns in the following order.
 
 # G. Observability Patterns
 
-### 17. Centralized Logging Pattern
+### 14. Centralized Logging Pattern
 
 * Central log collection
 * ELK
@@ -209,17 +190,10 @@ A very important interview concept is:
 | Bulkhead                    | Resource exhaustion caused by one dependency       |
 | Database per Service        | Tight coupling through shared database             |
 | Saga                        | Distributed transactions                           |
-| CQRS                        | Different read/write requirements                  |
-| Event Sourcing              | Maintaining complete state-change history          |
 | Load Balancing              | Distributing traffic across instances              |
-| Stateless Service           | Easy horizontal scaling                            |
 | Idempotency                 | Duplicate request processing                       |
 | Rate Limiting               | Excessive traffic                                  |
-| Strangler Fig               | Gradual monolith migration                         |
-| Centralized Configuration   | Configuration management across services           |
 | Sidecar                     | Offloading common infrastructure functionality     |
-| Ambassador                  | Managing external communication                    |
-| Distributed Tracing         | Debugging requests across services                 |
 | Centralized Logging         | Searching/analyzing logs across services           |
 
 ---
